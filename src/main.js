@@ -1,26 +1,32 @@
 /**
  * WebSocket消息通信管理
- * {
- *    type: 'update_some',
- *    data: {}
- * }
  */
 
 class WebSocketMG {
+
+  /**
+   * @param {string} url ws连接路径
+   */
   constructor(url) {
     this.url = url
     this.ws = null
-    this.wsCB = {
+    this.wsCB = { // ws事件回调函数
+      onmessage: null,
       onopen: null,
       onclose: null,
       onerror: null,
-      connecting: []
+      connecting: [], // 在open开启后到完成之间，去重复调用open函数传的回调；在完成之后去执行并清空
     }
     this.isOpen = false // ws当前是否已连接
     this.isConnecting = false // ws当前是否正在连接
     this.subscribe = {} // ws.onmessage对应消息类型的 订阅者回调
     this.catalog = {} // 订阅者ID 对应的消息类型 可查询目录
   }
+
+  /**
+   * 开启WebSocket连接
+   * @param {function} cb 开启完成后执行回调（成功onopen 失败onerror）
+   */
   open(cb) {
     const that = this
     const subscribe = that.subscribe
@@ -64,6 +70,7 @@ class WebSocketMG {
       })
     }
     that.ws.onmessage = function(event) {
+      that.wsCB.onmessage && that.wsCB.onmessage(event)
       if (typeof event.data == 'string') {
         let res
         try {
@@ -79,7 +86,7 @@ class WebSocketMG {
           let index = 0
           while(index < total) {
             let sub = subscribe[res.type][index]
-            if (typeof sub.cb === 'function') sub.cb(res.data || {})
+            if (typeof sub.cb === 'function') sub.cb(res.data)
             index++
           }
         }
@@ -87,8 +94,30 @@ class WebSocketMG {
     }
   }
 
-  send(msgType, params = {}, cb) {
+  /**
+   * 关闭WebSocket连接
+   */
+  close() {
+    this.isOpen && this.ws.close()
+  }
+
+  /**
+   * 发送WebSocket通信消息
+   * 发送消息格式：
+   *  {
+   *    type: 'update_some',
+   *    data: {}
+   *  }
+   * @param {string} msgType 消息类型（与接收端自行约定）
+   * @param {string|number|array|object} params 发送的数据
+   * @param {function} cb 发送后的回调
+   */
+  send(msgType, params, cb) {
     const that = this
+    if (typeof msgType !== 'string') {
+      that.consoleError('send', 'first parameter not a string')
+      return
+    }
     let body = JSON.stringify({
       type: msgType,
       data: params
@@ -108,19 +137,32 @@ class WebSocketMG {
       }) 
     }
   }
-
-  close() {
-    this.isOpen && this.ws.close()
-  }
   
+  /**
+   * 订阅 onmessage 接收消息
+   * @param {string} msgType 消息类型（与接收端自行约定）
+   * @param {function} cb 接收后的回调
+   * @returns {string} id 此订阅消息的ID
+   */
   onmsg(msgType, cb) {
-    if (typeof msgType !== 'string' || typeof cb !== 'function') return
+    if (typeof msgType !== 'string') {
+      that.consoleError('onmsg', 'first parameter not a string')
+      return
+    } else if (typeof cb !== 'function') {
+      that.consoleError('onmsg', 'second parameter not a function')
+      return
+    }
     if (!this.subscribe[msgType]) this.subscribe[msgType] = []
     let id = `${+new Date()}_${Math.floor(Math.random() * 100000)}`
     this.subscribe[msgType].push({id, cb})
     this.catalog[id] = {type: msgType}
     return id
   }
+
+  /**
+   * 取消订阅消息
+   * @param {string} id 订阅消息的ID
+   */
   off(id) {
     if (!this.catalog[id]) return
     let type = this.catalog[id].type
@@ -134,19 +176,54 @@ class WebSocketMG {
     this.subscribe[type].splice(i, 1)
     delete this.catalog[id]
   }
+
+  /**
+   * 取消所有订阅消息
+   */
   offAll() {
     this.subscribe = {}
     this.catalog = {}
   }
   
+  /**
+   * onmessagen 原始监听回调
+   * @param {function} cb 回调函数
+   */
+  onmessage(cb) {
+    typeof cb === 'function' && (this.wsCB.onmessage = cb)
+  }
+
+  /**
+   * onopen 原始监听回调
+   * @param {function} cb 回调函数
+   */
   onopen(cb) {
     typeof cb === 'function' && (this.wsCB.onopen = cb)
   }
+
+  /**
+   * onclose 原始监听回调
+   * @param {function} cb 回调函数
+   */
   onclose(cb) {
     typeof cb === 'function' && (this.wsCB.onclose = cb)
   }
+
+  /**
+   * onerror 原始监听回调
+   * @param {function} cb 回调函数
+   */
   onerror(cb) {
     typeof cb === 'function' && (this.wsCB.onerror = cb)
+  }
+
+  /**
+   * 统一格式的错误报错提示
+   * @param {string} func 函数名
+   * @param {string} msg 错误消息
+   */
+  consoleError(func = '', msg = '') {
+    console.error(`[WebSocketMG] (${func}) function: ${msg}`)
   }
 }
 

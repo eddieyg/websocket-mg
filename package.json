@@ -1,0 +1,18 @@
+{
+  "name": "websocket-mg",
+  "version": "1.0.0",
+  "description": "websocket manager",
+  "main": "src/index.js",
+  "author": "eddieyg",
+  "email": "eddiezhao@foxmail.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eddieyg/websocket-mg.git"
+  },
+  "scripts": {},
+  "keywords": [
+    "ws",
+    "websocket"
+  ],
+  "license": "ISC"
+}

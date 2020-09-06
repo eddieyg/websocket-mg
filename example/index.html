@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../dist/websocket-mg.min.js"></script>
+  <!-- <script src="./libs/require.js" data-main="main.js"></script> -->
+  <!-- <script src="./libs/sea.js"></script> -->
+</head>
+<body>
+  <script>
+    var ws = new WebSocketMG('ws://127.0.0.1:7788')
+    ws.onopen(res => {
+      console.log('ws open', res)
+    })
+    ws.open()
+
+    // AMD
+    // require.config({
+    //   baseUrl: './',
+    //   paths: {
+    //     WebSocketMG: '../dist/websocket-mg.min',
+    //   }
+    // })
+
+    // CMD
+    // seajs.config({
+    //   base: './',
+    //   alias: {
+    //     WSMG: '../dist/websocket-mg.min'
+    //   }
+    // });
+    // seajs.use('./main.js')
+
+
+  </script>
+</body>
+</html>

@@ -227,4 +227,5 @@ class WebSocketMG {
   }
 }
 
+// module.exports = WebSocketMG
 export default WebSocketMG

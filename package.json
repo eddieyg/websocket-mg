@@ -2,17 +2,22 @@
   "name": "websocket-mg",
   "version": "1.0.0",
   "description": "websocket manager",
-  "main": "src/index.js",
+  "main": "src/main.js",
   "author": "eddieyg",
   "email": "eddiezhao@foxmail.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/eddieyg/websocket-mg.git"
   },
-  "scripts": {},
+  "scripts": {
+    "build": "webpack-cli --config build/webpack.config.js"
+  },
   "keywords": [
     "ws",
     "websocket"
   ],
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "clean-webpack-plugin": "^3.0.0"
+  }
 }

@@ -16,11 +16,11 @@ ws.onopen(() => {
   console.log('ws open')
 })
 
-id = ws.onerror(() => {
+ws.onerror(() => {
   console.log('ws error')
 })
 
-id = ws.onclose(() => {
+ws.onclose(() => {
   console.log('ws close')
 })
 

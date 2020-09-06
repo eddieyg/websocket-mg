@@ -4,6 +4,12 @@
 ## 安装
 ```
 npm install websocket-mg --save
+import WebSocketMG from 'websocket-mg'
+
+or
+
+<script src="../dist/websocket-mg.min.js"></script>
+new WebSocketMG('ws://...')
 ```
 
 ## 使用
